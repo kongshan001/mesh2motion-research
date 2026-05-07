@@ -120,12 +120,31 @@ mixamo_config        // Mixamo 标准命名
 - ✅ 模型：`https://app.mesh2motion.org/models/model-human.glb` — 428 KB，GLB v2 有效
 - ✅ 动画包：`https://app.mesh2motion.org/animations/human-base-animations.glb` — 5.8 MB，含 87 个有效动画
 
-### 5.3 本地运行能力
+### 5.3 浏览器自动化完整流程（Playwright + Xvfb）
+**验证方式**：无头服务器环境（无 GPU/无显示器），使用 Xvfb 虚拟 X 服务器 + Playwright Chromium
+
+✅ **完整跑通流程**：
+1. `Xvfb :99 -screen 0 1280x720x24` — 启动虚拟显示器
+2. Playwright `headless=False` 启动 Chromium
+3. `page.goto()` → `page.evaluate()` JS 点击绕过 Shadow DOM/overlay
+4. 24 帧截图 @ 8 FPS → ffmpeg palette 模式合成 GIF
+5. 飞书 Bot API `POST /im/v1/images` 发送 GIF ✅
+
+**GLB 导出质量对比**：
+
+| 来源 | 骨骼数 | Channels | 文件大小 |
+|------|--------|----------|---------|
+| Python 手动合并（之前） | 18 | 18 | 89.5 KB |
+| **Mesh2Motion UI 导出** | **48** | **49** | **207.7 KB** |
+
+UI 导出的 GLB 质量远高于手动合并：48 个骨骼节点（Mesh2Motion 自动生成的完整骨骼链）、49 个独立 channels（每个骨骼独立控制）。
+
+### 5.4 本地运行能力
 - ✅ Node.js v24.13.1 + npm 11.8.0 已具备
 - ✅ `npm install && npm run dev` 可本地启动
 - ⚠️ 由于是纯前端应用，WebGL 渲染依赖浏览器环境
 
-### 5.4 算法质量评估
+### 5.5 算法质量评估
 
 **优点：**
 - 骨骼分类合理（Torso/Limb/Extremity），避免肢体关节处动画变形
